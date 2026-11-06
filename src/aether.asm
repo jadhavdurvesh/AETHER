@@ -108,6 +108,10 @@ _start:
     jne .format_error
     cmp byte [file_buffer+6], 1
     jne .format_error
+    cmp dword [file_buffer+20], 1
+    jne .format_error
+    cmp word [file_buffer+52], ELF_HEADER_SIZE
+    jb .format_error
     cmp word [file_buffer+18], 62
     jne .format_error
 
@@ -130,6 +134,8 @@ _start:
     mov rdx, [phentsize]
     test rcx, rcx
     jz .check_sections
+    cmp rax, ELF_HEADER_SIZE
+    jb .bounds_error
     cmp rdx, PROGRAM_HEADER_SIZE
     jb .bounds_error
     imul rcx, rdx
@@ -145,6 +151,8 @@ _start:
     mov rdx, [shentsize]
     test rcx, rcx
     jz .print_report
+    cmp rax, ELF_HEADER_SIZE
+    jb .bounds_error
     cmp rdx, 64
     jb .bounds_error
     imul rcx, rdx
