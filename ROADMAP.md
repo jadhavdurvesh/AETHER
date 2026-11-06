@@ -3,6 +3,8 @@
 ## M0 — ELF inspection
 - [x] NASM x86-64 executable and syscall I/O
 - [x] ELF64 identity validation
+- [x] ELF header version and minimum header-size validation
+- [x] Reject program/section tables overlapping the ELF header
 - [x] x86-64 machine validation
 - [x] Entry point and ELF type display
 - [x] Program header parsing and bounds checks
