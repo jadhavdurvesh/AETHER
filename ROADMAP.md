@@ -43,3 +43,7 @@
 
 - [x] Malformed program-header and section-header offset regression tests
 
+
+- [x] Validate section-name string-table index against the section table
+- [ ] Resolve section names from the section-name string table
+- [ ] Parse ELF symbol tables and linked string tables
