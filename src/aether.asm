@@ -62,6 +62,7 @@ phentsize resq 1
 phnum resq 1
 shentsize resq 1
 shnum resq 1
+shstrndx resq 1
 hex_buffer resb 17
 dec_buffer resb 24
 path_ptr resq 1
@@ -167,6 +168,8 @@ _start:
     mov [shentsize], rax
     movzx rax, word [file_buffer+60]
     mov [shnum], rax
+    movzx rax, word [file_buffer+62]
+    mov [shstrndx], rax
 
     ; Validate table ranges before dereferencing.
     mov rax, [phoff]
@@ -201,6 +204,16 @@ _start:
     jc .bounds_error
     cmp rax, [file_size]
     ja .bounds_error
+
+    ; A non-undefined section-name table index must reference an existing section.
+    mov rax, [shnum]
+    test rax, rax
+    jz .print_report
+    mov rcx, [shstrndx]
+    test rcx, rcx
+    jz .print_report
+    cmp rcx, rax
+    jae .bounds_error
 
 .print_report:
     mov rsi, msg_file
