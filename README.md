@@ -45,3 +45,5 @@ See ROADMAP.md and docs/design.md.
 ## License
 
 MIT.
+
+Smoke tests include malformed program-header and section-header offsets, in addition to non-ELF and oversized-input rejection.
