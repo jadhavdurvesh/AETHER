@@ -24,3 +24,7 @@ The ELF64 header is 64 bytes. Program headers are expected to be at least 56 byt
 ## Safety and correctness
 
 AETHER does not execute the inspected file. It opens the input read-only and parses metadata. It should still be treated as an early-stage parser: use test fixtures and fuzzing before relying on it for untrusted binaries.
+
+## Input reads
+
+The file reader loops until EOF rather than assuming one Linux `read` syscall fills the requested buffer. It accepts files up to the configured 16 MiB ceiling and probes one additional byte to distinguish an exactly-at-limit file from an oversized input. The parser still uses a fixed in-memory buffer; this is not large-file streaming.
