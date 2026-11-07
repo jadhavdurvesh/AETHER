@@ -34,3 +34,5 @@
 - [ ] Single-step execution
 - [ ] Memory and stack inspection
 - [ ] Execution trace export
+
+- [x] Handle short reads and enforce the 16 MiB input ceiling
