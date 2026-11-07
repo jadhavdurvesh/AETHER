@@ -36,3 +36,5 @@
 - [ ] Execution trace export
 
 - [x] Handle short reads and enforce the 16 MiB input ceiling
+
+- [x] Smoke test for files exceeding the 16 MiB input ceiling
