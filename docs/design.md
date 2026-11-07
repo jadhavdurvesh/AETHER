@@ -28,3 +28,5 @@ AETHER does not execute the inspected file. It opens the input read-only and par
 ## Input reads
 
 The file reader loops until EOF rather than assuming one Linux `read` syscall fills the requested buffer. It accepts files up to the configured 16 MiB ceiling and probes one additional byte to distinguish an exactly-at-limit file from an oversized input. The parser still uses a fixed in-memory buffer; this is not large-file streaming.
+
+The smoke-test script also creates a sparse file one byte above the configured limit and checks that the explicit size-limit diagnostic is emitted.
