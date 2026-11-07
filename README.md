@@ -47,3 +47,5 @@ See ROADMAP.md and docs/design.md.
 MIT.
 
 Smoke tests include malformed program-header and section-header offsets, in addition to non-ELF and oversized-input rejection.
+
+The inspector also rejects a non-undefined section-name string-table index that falls outside the declared section-header table. Section-name resolution and symbol/relocation inspection remain future work.
