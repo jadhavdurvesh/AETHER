@@ -43,4 +43,14 @@ if "$BIN" "$bad_sh" > "$ROOT/build/bad-shoff.txt" 2>&1; then
   exit 1
 fi
 grep -q "malformed ELF table bounds" "$ROOT/build/bad-shoff.txt"
+
+# Reject a section-name string table index outside the section table.
+bad_names="$ROOT/build/bad-shstrndx.elf"
+cp "$BIN" "$bad_names"
+printf '\\377\\377' | dd of="$bad_names" bs=1 seek=62 conv=notrunc status=none
+if "$BIN" "$bad_names" > "$ROOT/build/bad-shstrndx.txt" 2>&1; then
+  echo "expected invalid section-name table index to fail" >&2
+  exit 1
+fi
+grep -q "malformed ELF table bounds" "$ROOT/build/bad-shstrndx.txt"
 echo "AETHER smoke tests passed"
