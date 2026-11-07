@@ -18,6 +18,8 @@ err_open db "aether: cannot open input file",10
 err_open_len equ $-err_open
 err_read db "aether: failed to read input file",10
 err_read_len equ $-err_read
+err_too_large db "aether: input exceeds 16 MiB limit",10
+err_too_large_len equ $-err_too_large
 err_format db "aether: invalid or unsupported ELF64 file",10
 err_format_len equ $-err_format
 err_bounds db "aether: malformed ELF table bounds",10
@@ -52,7 +54,7 @@ msg_no_sh db "(no section headers)",10
 msg_no_sh_len equ $-msg_no_sh
 
 section .bss
-file_buffer resb MAX_FILE
+file_buffer resb MAX_FILE+1
 file_size resq 1
 phoff resq 1
 shoff resq 1
@@ -84,17 +86,55 @@ _start:
     js .open_error
     mov r12, rax
 
-    xor rax, rax
+    ; Read until EOF: a single read syscall is allowed to return a short
+    ; result even when more bytes are available.
+    xor r14, r14
+.read_more:
+    mov rax, SYS_read
     mov rdi, r12
-    lea rsi, [file_buffer]
+    lea rsi, [file_buffer+r14]
     mov rdx, MAX_FILE
+    sub rdx, r14
+    test rdx, rdx
+    jz .read_limit
     syscall
-    mov r13, rax
+    test rax, rax
+    js .read_error_close
+    jz .read_done
+    add r14, rax
+    jmp .read_more
+.read_limit:
+    ; Distinguish an exactly-full file from one that exceeds the limit.
+    mov rax, SYS_read
+    mov rdi, r12
+    lea rsi, [file_buffer+MAX_FILE]
+    mov rdx, 1
+    syscall
+    test rax, rax
+    js .read_error_close
+    test rax, rax
+    jnz .too_large_close
+.read_done:
     mov rax, SYS_close
     mov rdi, r12
     syscall
+    mov r13, r14
     test r13, r13
     jle .read_error
+    jmp .after_read
+.read_error_close:
+    mov rax, SYS_close
+    mov rdi, r12
+    syscall
+    jmp .read_error
+.too_large_close:
+    mov rax, SYS_close
+    mov rdi, r12
+    syscall
+    mov rsi, err_too_large
+    mov rdx, err_too_large_len
+    jmp fail_with_code
+.after_read:
     cmp r13, ELF_HEADER_SIZE
     jb .format_error
     mov [file_size], r13
