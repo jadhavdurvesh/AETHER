@@ -23,4 +23,24 @@ if "$BIN" "$oversized" > "$ROOT/build/oversized.txt" 2>&1; then
   exit 1
 fi
 grep -q "exceeds 16 MiB limit" "$ROOT/build/oversized.txt"
+
+# Corrupt e_phoff to an out-of-file offset; the parser must reject table bounds.
+bad_ph="$ROOT/build/bad-phoff.elf"
+cp "$BIN" "$bad_ph"
+printf '\\377\\377\\377\\377\\377\\377\\377\\177' | dd of="$bad_ph" bs=1 seek=32 conv=notrunc status=none
+if "$BIN" "$bad_ph" > "$ROOT/build/bad-phoff.txt" 2>&1; then
+  echo "expected malformed program-header bounds to fail" >&2
+  exit 1
+fi
+grep -q "malformed ELF table bounds" "$ROOT/build/bad-phoff.txt"
+
+# Corrupt e_shoff similarly, retaining the valid program-header table.
+bad_sh="$ROOT/build/bad-shoff.elf"
+cp "$BIN" "$bad_sh"
+printf '\\377\\377\\377\\377\\377\\377\\377\\177' | dd of="$bad_sh" bs=1 seek=40 conv=notrunc status=none
+if "$BIN" "$bad_sh" > "$ROOT/build/bad-shoff.txt" 2>&1; then
+  echo "expected malformed section-header bounds to fail" >&2
+  exit 1
+fi
+grep -q "malformed ELF table bounds" "$ROOT/build/bad-shoff.txt"
 echo "AETHER smoke tests passed"
