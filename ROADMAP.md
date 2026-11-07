@@ -40,3 +40,6 @@
 - [x] Smoke test for files exceeding the 16 MiB input ceiling
 
 - [x] Smoke tests for out-of-range program-header and section-header offsets
+
+- [x] Malformed program-header and section-header offset regression tests
+
